@@ -1,0 +1,417 @@
+<html>
+
+<head>
+	<title>Pi-na-o Game</title>
+	<link type="text/css" rel="stylesheet" href="css/main.css"/>
+	<script type="text/javascript" src="js/main.js"></script>
+	<script type="text/javascript">
+	var noteLowerRange = 2; //Keyboard's first key : 2 = e0 (2+7*0)
+	var noteUpperRange = 24; //Keyboard's first key : 24 = f3 (3+7*3)
+
+	var keyLowerRange = 1; //Keyboard's first key : 1 = d0 (1+7*0)
+	var keyUpperRange = 24; //Keyboard's last key : 24 = f3 (3+7*3)
+	
+	var note = new Array();
+	
+	var counter = 0;
+	var maxCount = 10;
+	var speed = 0;
+	var v_score = 0;
+	var v_correct = 0;
+	var v_wrong = 0;
+	var v_miss = 0;
+	var v_combo = 0;
+	var v_maxCombo = 0;
+	var whiteKeyImg = "res/key_wk.jpg";
+	var whiteKeyPressImg = "res/key_wkp.jpg";
+	var whiteKeyOutImg = "res/key_wko.jpg";
+	var blackKeyImg = "res/keyboard_bk.jpg";
+	var blackKeyPressImg = "res/keyboard_bkp.jpg";	
+	var blackKeyAjust = -35;
+	
+	function newGame()
+	{
+		counter = 0;
+		noteRefresh()
+		keyRefresh();
+		setProperty();
+	}
+	function keyInit()
+	{
+		document.write("<img src="+whiteKeyOutImg+" id='wk1' class='whitekey'/>");
+		for(var keyNumber = keyLowerRange+1; keyNumber <= keyUpperRange; keyNumber++)
+		{
+			if(keyNumber < getNoteLowerRange() || keyNumber > getNoteUpperRange())
+				document.write("<img src="+whiteKeyOutImg+" id=wk"+keyNumber+" class='whiteKey'/>");
+			else
+				document.write("<img src="+whiteKeyImg+" id=wk"+keyNumber+" class='whiteKey' onMouseOut='wKeyMouseOut(this)' onclick='wKeyOnClick("+keyNumber+")'/>");
+			if(!((keyNumber % 7 == 3) || (keyNumber % 7 == 0)))
+			{
+				document.write("<span style='position:"+"absolute;"+"'>");
+				document.write("<img src="+blackKeyImg+" id=bk"+(keyNumber-0.5)+" class='blackKey' onMouseOut='bKeyMouseOut(this)' onclick='bKeyOnClick("+(keyNumber-0.5)+")' onload='balckKeyInit(this)'/>");
+				document.write("</span>");
+			}
+		}
+	}
+	function balckKeyInit(key)
+	{
+		key.style.position = "relative";
+		key.style.left = blackKeyAjust;
+	}
+	function keyRefresh()
+	{
+		for(var keyNumber = keyLowerRange+1; keyNumber <= keyUpperRange; keyNumber++)
+		{
+			if(keyNumber < getNoteLowerRange() || keyNumber > getNoteUpperRange())
+			{
+				document.getElementById("wk"+keyNumber).src = whiteKeyOutImg;
+				document.getElementById("wk"+keyNumber).className = "whiteKey_l";
+			}
+			else
+			{
+				document.getElementById("wk"+keyNumber).src = whiteKeyImg;
+				document.getElementById("wk"+keyNumber).className = "whiteKey";
+			}
+		}
+	}
+	function noteInit()
+	{	
+		for(var i = 0; i < maxCount; i++)
+		{
+			document.write("<img id='note"+i+"'/>");
+		}
+	}
+	function getNoteLowerRange()
+	{
+		x=document.getElementById("lowerNote");
+		lNote = x.options[x.selectedIndex].text;
+		x=document.getElementById("lowerStep");
+		lStep = parseInt(x.options[x.selectedIndex].text);
+		
+		lowerRange = noteNo(lNote);
+		lowerRange += 7*lStep;
+		return lowerRange;
+	}
+	function getNoteUpperRange()
+	{
+		x=document.getElementById("upperNote");
+		uNote = x.options[x.selectedIndex].text;
+		x=document.getElementById("upperStep");
+		uStep = parseInt(x.options[x.selectedIndex].text);
+		
+		upperRange = noteNo(uNote);
+		upperRange += 7*uStep;
+		return upperRange;
+	}
+	function noteRefresh()
+	{
+		lowerRange = getNoteLowerRange();
+		upperRange = getNoteUpperRange();
+		if(lowerRange > upperRange)
+		{
+			alert("The lower range should be lower than upper range.");
+			return;
+		}
+		else if(lowerRange < noteLowerRange)
+		{
+			alert("Sorry, this system do not support the note lower than e0.");
+			return;
+		}
+		else if(upperRange > noteUpperRange)
+		{
+			alert("Sorry, this system do not support the note higher than f3.");
+			return;
+		}
+		else
+		{
+			for(var i = 0; i < maxCount; i++){
+				note[i] = lowerRange+Math.floor((Math.random()*(1+upperRange-lowerRange)));
+				//alert(note[i]);
+				keySby = noteSby( note[i] % 7 );
+				keyStep = Math.floor( note[i] / 7 );
+				document.getElementById("note"+i).src = 'img/'+keySby +keyStep+'.gif';
+				document.getElementById("note"+i).style.visibility = "visible";
+			}
+		}
+	}
+	function setProperty()
+	{
+		x=document.getElementById("speed");
+		if(parseInt(x.options[x.selectedIndex].text) == 0)
+			speed = 0;
+		else
+			speed = 110-parseInt(x.options[x.selectedIndex].text)*10;
+		
+		placeIt("piano_line", 0,20);
+		moveIt("piano_line", 1, 0);
+	}
+	function placeIt(id,x,y)
+	{
+		object=document.getElementById(id);
+		object.style.left = x+"px";
+		object.style.top = y+"px";
+	}
+	function moveIt(id, dx, dy)
+	{
+		object = document.getElementById(id);
+		xc = parseInt(object.style.left);
+		if(xc <= 540 && speed > 0)
+		{
+			if(xc >= 90 + counter * 40 && counter < maxCount)
+			{
+				document.getElementById("note"+counter).style.visibility = "hidden";
+				document.getElementById("miss").innerHTML = ++v_miss;
+				resetCombo();
+				++counter;
+			}
+			object.style.left = xc+dx+"px";
+			lineTimer = setTimeout("moveIt('piano_line', 1, 0)", speed);
+		}
+		else if(xc > 540)
+		{
+			gameOver();
+			if(document.getElementById("autoRefresh").checked) newGame();
+		}
+	}
+	function setHintPt(keyNumber)
+	{
+		document.getElementById("pt").style.left = document.getElementById("piano_line").style.left;
+		document.getElementById("pt").style.top = (24-keyNumber)*5 - 5;
+		document.getElementById("pt").src = "res/pt.gif";
+	}
+	function wKeyOnClick(keyNumber)
+	{
+		if(document.getElementById("hintPt").checked)
+			setHintPt(keyNumber);
+		if(keyNumber >= getNoteLowerRange() && keyNumber <= getNoteUpperRange())
+		{
+			if(keyNumber <= 28) EvalSound(keyNumber);
+			document.getElementById("wk"+keyNumber).src = whiteKeyPressImg;
+			if(keyNumber == note[counter])
+			{
+				document.getElementById("note"+counter).style.visibility = "hidden";
+				document.getElementById("correct").innerHTML = ++v_correct;
+				document.getElementById("combo").innerHTML = ++v_combo;
+				v_score = parseInt(v_score+(getNoteUpperRange()-getNoteLowerRange())*v_combo);
+				document.getElementById("score").innerHTML = v_score;
+				counter++;
+				if(counter >= maxCount)
+				{
+					gameOver();
+					if(document.getElementById("autoRefresh").checked) newGame();
+				}
+			}
+			else
+			{
+				document.getElementById("wrong").innerHTML = ++v_wrong;
+				v_score = parseInt(v_score-2);
+				document.getElementById("score").innerHTML = v_score;
+				resetCombo();
+			}
+		}
+	}
+	function resetCombo()
+	{
+		if(v_combo > 0)
+		{
+			if(v_combo > v_maxCombo) v_maxCombo = v_combo;
+			v_combo = 0;
+			document.getElementById("combo").innerHTML = v_combo;
+			document.getElementById("maxCombo").innerHTML = v_maxCombo;
+		}
+	}
+	function gameOver()
+	{
+		if(speed > 0) clearTimeout(lineTimer);
+	}
+	function keyPressTest(e){
+		if(window.event) // IE
+		{
+			keynum = e.keyCode;
+		}
+		else if(e.which) // Netscape/Firefox/Opera
+		{
+			keynum = e.which;
+		}
+		if(keynum == 13){ //ENTER key
+			gameOver();
+			newGame();
+		}
+		keychar = String.fromCharCode(keynum);
+		kno = keyNo(keychar);
+		if(kNo >= getNoteLowerRange() && kNo <= getNoteUpperRange())
+			wKeyOnClick(kno);
+	}
+	function keyUpTest(e){
+		if(window.event) // IE
+		{
+			keynum = e.keyCode;
+		}
+		else if(e.which) // Netscape/Firefox/Opera
+		{
+			keynum = e.which;
+		}
+		keychar = String.fromCharCode(keynum+32);
+		kNo = keyNo(keychar);
+		if(kNo >= getNoteLowerRange() && kNo <= getNoteUpperRange())
+			if(document.getElementById("wk"+kNo).className == "whiteKey")
+				document.getElementById("wk"+kNo).src = whiteKeyImg;
+		}
+	</script>
+</head>
+
+<body onKeyPress="keyPressTest(event)" onKeyUp="keyUpTest(event)">
+
+	<div id='container'>
+		<div id='container_bg'>
+			<table cellpadding="0" cellspacing="0">
+				<tr>
+					<td>
+						<div id='result'>
+							<table>
+								<tr>
+									<td class='resultList'>Score:<span id='score'>0</span></td>
+									<td class='resultList'>Correct:<span id='correct'>0</span></td>
+									<td class='resultList'>Wrong:<span id='wrong'>0</span></td>
+									<td class='resultList'>Miss:<span id='miss'>0</span></td>
+									<td class='resultList'>Combo:<span id='combo'>0</span></td>
+									<td class='resultList'>Max Combo:<span id='maxCombo'>0</span></td>
+								</tr>
+							</table>
+						</div>
+					</td>
+					<td rowspan="2" valign="middle">
+						<div id='selection'>
+							Lower Range:
+							<select id='lowerNote'>
+								<option>c</option>
+								<option>d</option>
+								<option selected="selected">e</option>
+								<option>f</option>
+								<option>g</option>
+								<option>a</option>
+								<option>b</option>
+							</select>
+							<select id='lowerStep'>
+								<option selected="selected">0</option>
+								<option>1</option>
+								<option>2</option>
+								<option>3</option>
+							</select>
+							<br>
+							Upper Range:
+							<select id='upperNote'>
+								<option>c</option>
+								<option>d</option>
+								<option>e</option>
+								<option selected="selected">f</option>
+								<option>g</option>
+								<option>a</option>
+								<option>b</option>
+							</select>
+							<select id='upperStep'>
+								<option>0</option>
+								<option>1</option>
+								<option>2</option>
+								<option selected="selected">3</option>
+							</select>
+							<br>
+							Speed Level :
+							<select id='speed'>
+								<option selected="selected">0</option>
+								<option>1</option>
+								<option>2</option>
+								<option>3</option>
+								<option>4</option>
+								<option>5</option>
+								<option>6</option>
+								<option>7</option>
+								<option>8</option>
+								<option>9</option>
+							</select>
+							<br>
+							Hint : <input type="checkbox" id="hintPt" checked="checked">
+							Auto Refresh : <input type="checkbox" id="autoRefresh">
+							<a href="#" onClick="gameOver(), newGame()" id="refresh">Refresh</a>
+							<br>Please "Enter" to Start New Game.
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>
+						<div id="line">
+							<img src="img/major.gif" width="40" height="120">
+							<img src="res/piano_line.bmp" id="piano_line">
+							<img src="res/no.bmp" id="pt">
+							<script type="text/javascript">
+								noteInit();
+							</script>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2">
+						<table cellpadding="0" cellspacing="0" id='keyboard'>
+							<tr>
+								<td id="key_left" rowspan="3"></td>
+								<td id="key_top"></td>
+								<td id="key_right" rowspan="3"></td>
+							</tr>
+							<tr>
+								<td id ="key">
+									<script type="text/javascript">
+										keyInit();
+										newGame();
+									</script>
+								</td>
+							</tr>
+							<tr>
+								<td>
+									<table align="left" cellpadding="0" cellspacing="0" id ="key_instr" >
+										<tr>
+											<td>x</td><td>c</td><td>v</td><td>b</td><td>n</td><td>m</td>
+											<td>a</td><td>s</td><td>d</td><td>f</td><td>g</td><td>h</td><td>j</td>
+											<td>q</td><td>w</td><td>e</td><td>r</td><td>t</td><td>y</td><td>u</td>
+											<td>i</td><td>o</td><td>p</td><td>[</td>
+										</tr>
+									</table>
+								</td>
+							</tr>
+						</table>
+					</td>
+				</tr>
+			</table>
+		</div>
+	</div>
+
+<!--
+<embed src="sounds/Low-C.mp3" autostart=false hidden=true name="sound0">
+<embed src="sounds/Low-D.mp3" autostart=false hidden=true name="sound1">
+<embed src="sounds/Low-E.mp3" autostart=false hidden=true name="sound2">
+<embed src="sounds/Low-F.mp3" autostart=false hidden=true name="sound3">
+<embed src="sounds/Low-G.mp3" autostart=false hidden=true name="sound4">
+<embed src="sounds/Low-A.mp3" autostart=false hidden=true name="sound5">
+<embed src="sounds/Low-B.mp3" autostart=false hidden=true name="sound6">
+
+<embed src="sounds/Middle-C.mp3" autostart=false hidden=true name="sound7">
+<embed src="sounds/Middle-D.mp3" autostart=false hidden=true name="sound8">
+<embed src="sounds/Middle-E.mp3" autostart=false hidden=true name="sound9">
+<embed src="sounds/Middle-F.mp3" autostart=false hidden=true name="sound10">
+<embed src="sounds/Middle-G.mp3" autostart=false hidden=true name="sound11">
+<embed src="sounds/Middle-A.mp3" autostart=false hidden=true name="sound12">
+<embed src="sounds/Middle-B.mp3" autostart=false hidden=true name="sound13">
+
+<embed src="sounds/High-C.mp3" autostart=false hidden=true name="sound14">
+<embed src="sounds/High-D.mp3" autostart=false hidden=true name="sound15">
+<embed src="sounds/High-E.mp3" autostart=false hidden=true name="sound16">
+<embed src="sounds/High-F.mp3" autostart=false hidden=true name="sound17">
+<embed src="sounds/High-G.mp3" autostart=false hidden=true name="sound18">
+<embed src="sounds/High-A.mp3" autostart=false hidden=true name="sound19">
+<embed src="sounds/High-B.mp3" autostart=false hidden=true name="sound20">
+-->
+
+
+
+</body>
+
+</html>

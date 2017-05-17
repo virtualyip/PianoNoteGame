@@ -1,0 +1,152 @@
+body
+{
+	padding: 0;
+	margin: 0;
+	text-align: center;
+	background: #DDFFFF;
+}
+
+body *
+{
+	text-align: center;
+	margin: auto;
+}
+
+#header
+{
+	padding: 0;
+}
+
+#container
+{
+	background: #336699;
+}
+
+#container_bg
+{
+	padding: 5 5 25px 5;
+	background: url(../res/master03_background.jpg);
+}
+
+#footer
+{
+	height: 0px;
+}
+
+#result
+{
+	width: 550px;
+	height: 30px;
+	border: 1px solid #0022ff;
+	padding: 5 5;
+	margin: 0;
+	background: url(../res/master03_background.jpg);
+}
+
+#result *
+{
+	text-decoration:none;
+	font-size: 12px;
+	font-family:Arial, Helvetica, sans-serif;
+	padding: 2;
+}
+
+#line
+{
+	width: 550px;
+	height: 120px;
+	text-align: left;
+	position: relative;
+	margin: 0;
+	border: 1px solid #0022ff;
+	background: url(../img/line.jpg);
+}
+
+#selection
+{
+	width: 170px;
+	height: 180px;
+	font-family: Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	padding: 5;
+	margin: 5;
+	border: 1px dotted #0022ff;
+	background: url(../res/master03_background.jpg);
+}
+
+#selection a
+{
+	display: block;
+	text-decoration: none;
+	border: 1px solid #000000;
+	margin: 5;
+	padding: 5;
+}
+
+#keyboard
+{
+	width: 720px;
+}
+
+#key_left
+{
+	width: 35px;
+	background: url(../res/keyboard2_l.gif) repeat-y 100% 0;
+}
+
+#key_right
+{
+	width: 35px;
+	background: url(../res/keyboard2_r.gif) repeat-y 0 0;
+}
+
+#key_top
+{
+	width: 650px;
+	height: 175px;
+	background: url(../res/keyboard_top.jpg) 0 -10px;
+}
+
+#key
+{
+	width: 650px;
+	background: #000000;
+}
+
+#key_instr
+{
+}
+
+#key_instr tr td
+{
+	width: 27px;
+	color: #FFFFFF;
+	background: #000000;
+	border-bottom: 2px solid #FF0000;
+}
+
+img
+{
+	border: 0;
+	text-decoration: none;
+}
+
+.whitekey_l
+{
+}
+
+
+.whitekey
+{
+	position: relative;
+}
+
+#piano_line
+{
+	position: absolute;
+}
+
+#pt
+{
+	position: absolute;
+}
